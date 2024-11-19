@@ -5,6 +5,7 @@ import BudgetSummary from "../components/BudgetSummary";
 import AddItemForm from "../components/AddItemForm";
 import ChecklistItemComponent from "../components/ChecklistItem";
 import EditBudgetForm from "../components/EditBudgetForm";
+import Header from "../components/Header";
 
 const Home = () => {
   const [isClient, setIsClient] = useState(false);
@@ -34,32 +35,46 @@ const Home = () => {
 
   const handleRemoveItem = (id: string) => {
     const itemToRemove = checklist.find((item) => item.id === id);
+  
     if (itemToRemove && itemToRemove.purchased) {
-      setBudget((prev: Budget) => ({
-        ...prev,
-        remaining: prev.remaining + itemToRemove.price,
-      }));
+      setBudget((prev: Budget): Budget => {
+        return {
+          total: prev.total,
+          remaining: prev.remaining + itemToRemove.price,
+        };
+      });      
     }
+  
+    // Remove o item da checklist
     setChecklist(checklist.filter((item) => item.id !== id));
-  };
+  };  
 
   const handleToggleStatus = (id: string) => {
     setChecklist(
       checklist.map((item) =>
-        item.id === id ? { ...item, purchased: !item.purchased } : item
+        item.id === id
+          ? { ...item, purchased: !item.purchased } 
+          : item
       )
     );
-
+  
     const toggledItem = checklist.find((item) => item.id === id);
+  
     if (toggledItem) {
-      setBudget((prev: Budget) => ({
-        ...prev, // Mantém o valor total
-        remaining: toggledItem.purchased
-          ? prev.remaining + toggledItem.price // Reverte o valor se o item foi desmarcado
-          : prev.remaining - toggledItem.price, // Subtrai se o item foi comprado
-      }));
+      
+      setBudget((prev: Budget): Budget => {
+        const updatedBudget: Budget = {
+          total: prev.total, // Preserva o total
+          remaining: toggledItem.purchased
+            ? prev.remaining + toggledItem.price
+            : prev.remaining - toggledItem.price,
+        };
+        return updatedBudget;
+      });
+      
     }
   };
+  
   
   const handleUpdateTotal = (newTotal: number) => {
     const spent = budget.total - budget.remaining;
@@ -87,11 +102,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-olive text-white py-6">
-        <div className="max-w-4xl mx-auto px-4">
-          <h1 className="text-3xl font-bold">Orçamento e Checklist</h1>
-        </div>
-      </header>
+      <Header />
       <main className="max-w-4xl mx-auto py-8 px-4 space-y-6">
         <BudgetSummary budget={budget} />
         <EditBudgetForm
