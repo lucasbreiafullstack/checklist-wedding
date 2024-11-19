@@ -1,25 +1,25 @@
-import { useEffect, useState } from 'react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-import { Budget, ChecklistItem } from '../utils/types';
-import BudgetSummary from '../components/BudgetSummary';
-import AddItemForm from '../components/AddItemForm';
-import ChecklistItemComponent from '../components/ChecklistItem';
-import EditBudgetForm from '../components/EditBudgetForm';
+import { useEffect, useState } from "react";
+import { useLocalStorage } from "../hooks/useLocalStorage";
+import { Budget, ChecklistItem } from "../utils/types";
+import BudgetSummary from "../components/BudgetSummary";
+import AddItemForm from "../components/AddItemForm";
+import ChecklistItemComponent from "../components/ChecklistItem";
+import EditBudgetForm from "../components/EditBudgetForm";
 
 const Home = () => {
-  const [isClient, setIsClient] = useState(false); 
-  const [budget, setBudget] = useLocalStorage<Budget>('budget', {
-    total: 1000, 
-    remaining: 1000, 
+  const [isClient, setIsClient] = useState(false);
+  const [budget, setBudget] = useLocalStorage<Budget>("budget", {
+    total: 1000,
+    remaining: 1000,
   });
-  
+
   const [checklist, setChecklist] = useLocalStorage<ChecklistItem[]>(
-    'checklist',
+    "checklist",
     []
   );
 
   useEffect(() => {
-    setIsClient(true); 
+    setIsClient(true);
   }, []);
 
   const handleAddItem = (name: string, price: number) => {
@@ -42,30 +42,25 @@ const Home = () => {
     }
     setChecklist(checklist.filter((item) => item.id !== id));
   };
-  
-  
 
   const handleToggleStatus = (id: string) => {
     setChecklist(
       checklist.map((item) =>
-        item.id === id
-          ? { ...item, purchased: !item.purchased }
-          : item
+        item.id === id ? { ...item, purchased: !item.purchased } : item
       )
     );
-  
+
     const toggledItem = checklist.find((item) => item.id === id);
     if (toggledItem) {
       setBudget((prev: Budget) => ({
-        ...prev,
+        ...prev, // Mantém o valor total
         remaining: toggledItem.purchased
-          ? prev.remaining + toggledItem.price
-          : prev.remaining - toggledItem.price,
+          ? prev.remaining + toggledItem.price // Reverte o valor se o item foi desmarcado
+          : prev.remaining - toggledItem.price, // Subtrai se o item foi comprado
       }));
     }
   };
   
-
   const handleUpdateTotal = (newTotal: number) => {
     const spent = budget.total - budget.remaining;
     setBudget({
@@ -74,7 +69,11 @@ const Home = () => {
     });
   };
 
-  const handleEditItem = (id: string, updatedName: string, updatedPrice: number) => {
+  const handleEditItem = (
+    id: string,
+    updatedName: string,
+    updatedPrice: number
+  ) => {
     setChecklist(
       checklist.map((item) =>
         item.id === id
@@ -83,7 +82,6 @@ const Home = () => {
       )
     );
   };
-  
 
   if (!isClient) return null;
 
@@ -102,7 +100,9 @@ const Home = () => {
         />
         <AddItemForm onAddItem={handleAddItem} />
         <div className="bg-white p-6 rounded-lg shadow-lg">
-          <h2 className="text-xl font-semibold text-olive mb-4">Lista de Itens</h2>
+          <h2 className="text-xl font-semibold text-olive mb-4">
+            Lista de Itens
+          </h2>
           {checklist.length > 0 ? (
             <ul className="space-y-4">
               {checklist.map((item) => (
